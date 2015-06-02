@@ -43,7 +43,6 @@ exports.requestHandler = function(request, response) {
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -56,20 +55,25 @@ exports.requestHandler = function(request, response) {
   storage.results = [];
   // Storage
   // Response
-  if (request.url = "/classes/messages") {
+  if (request.url === "/classes/messages") {
     if (request.method === "GET") {
+      response.writeHead(statusCode, headers);
       return response.end(JSON.stringify(storage));
     }
-  }
-  if (request.url = "/classes/room1") {
+  } else if (request.url === "/classes/room1") {
     if (request.method === "GET") {
+      response.writeHead(statusCode, headers);
       return response.end(JSON.stringify(storage));
     }
-  }
-  if (request.url = "/send") {
+  } else if (request.url === "/classes/room") {
     if (request.method === "POST") {
+      statusCode = 201;
+      response.writeHead(statusCode, headers);
       return response.end(JSON.stringify(storage));
     }
+  } else {
+    statusCode = 404;
+    response.writeHead(statusCode, headers);
   }
   response.end("Hello, World!");
 
