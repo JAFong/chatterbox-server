@@ -11,7 +11,7 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-
+var storage = [];
 exports.requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -30,7 +30,7 @@ exports.requestHandler = function(request, response) {
   console.log("Serving request type " + request.method + " for url " + request.url);
 
   // The outgoing status.
-  var statusCode = 200;
+  var statusCode = 404;
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -39,7 +39,7 @@ exports.requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = "text/plain";
+  headers['Content-Type'] = "application/json";
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
@@ -51,31 +51,34 @@ exports.requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  var storage = {};
-  storage.results = [];
+
   // Storage
   // Response
-  if (request.url === "/classes/messages") {
-    if (request.method === "GET") {
-      response.writeHead(statusCode, headers);
-      return response.end(JSON.stringify(storage));
+
+  var data;
+
+  if (request.method === "GET"){
+    if (request.url === "/classes/messages" || request.url === "/classes/room1" || request.url === "/class/room"){
+      statusCode = 200;
+      data = {results: storage};
     }
-  } else if (request.url === "/classes/room1") {
-    if (request.method === "GET") {
-      response.writeHead(statusCode, headers);
-      return response.end(JSON.stringify(storage));
+  } else if(request.method === "POST"){
+    statusCode = 201;
+    if (request.url === "/classes/messages" || request.url === "/classes/room1" || request.url === "/classes/room"){
+      // console.log(" after post");
+      request.on("data", function(data){
+        var stringData = JSON.parse(data);
+        // var prevStorage = storage;
+        storage.push({username: stringData.username, message: stringData.message, roomname: stringData.roomname});
+        data = stringData;
+        // response.end(prevStorage);
+      });
     }
-  } else if (request.url === "/classes/room") {
-    if (request.method === "POST") {
-      statusCode = 201;
-      response.writeHead(statusCode, headers);
-      return response.end(JSON.stringify(storage));
-    }
-  } else {
-    statusCode = 404;
-    response.writeHead(statusCode, headers);
   }
-  response.end("Hello, World!");
+
+  console.log(data);
+  response.writeHead(statusCode, headers);
+  response.end(JSON.stringify(data));
 
 
 };
@@ -95,5 +98,4 @@ var defaultCorsHeaders = {
   "access-control-allow-headers": "content-type, accept",
   "access-control-max-age": 10 // Seconds.
 };
-
 
