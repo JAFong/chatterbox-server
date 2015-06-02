@@ -74,6 +74,12 @@ exports.requestHandler = function(request, response) {
         // response.end(prevStorage);
       });
     }
+  } else if (request.method === "PUT"){
+
+  } else if (request.method === "DELETE"){
+
+  } else if (request.method === "OPTIONS"){
+    statusCode = 200;
   }
 
   console.log(data);
